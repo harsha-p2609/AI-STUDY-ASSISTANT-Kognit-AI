@@ -1,142 +1,154 @@
-# Kognit AI
+# Kognit AI — Interactive Study Assistant
+> **Flam Frontend Internship Assignment** | AI-Powered Interactive Tool (Not a Chatbot)
 
-Kognit AI is an interactive study assistant that turns notes or a topic into a structured learning workspace. It generates summaries, flashcards, and quizzes through the Groq API, then presents them in a stateful React interface.
+Kognit AI is a full-stack web application that takes free-form text notes or topics, sends them to an LLM provider (Groq API), and converts unpredictable AI output into structured JSON data to drive rich, stateful React components: interactive 3D flip flashcards with audio read-aloud, formatted PDF exports, checkable concept takeaways, and knowledge quizzes with wrong-answer re-testing.
 
-## Features
+This application strictly avoids chatbot interfaces, ensuring raw model output is validated defensively before ever reaching the UI.
 
-- Generate structured study material from notes or a topic.
-- Review interactive flashcards with flip, mastery, filtering, keyboard navigation, and text-to-speech support.
-- Check key takeaways and retest missed quiz questions.
-- Export flashcards as a PDF study guide.
-- Register or sign in with email/password or Google OAuth.
-- Automatically save generated workspaces to MongoDB for authenticated users.
-- Browse, reload, and delete saved workspaces.
-- Keep separate accounts signed in independently in separate browser tabs.
-- Handle malformed AI output, invalid schemas, timeouts, cancellations, and network failures with recovery states.
+---
 
-## Stack
+## 🎯 Core Features & Interactive UI
 
-- **Client:** React 18, Vite, Axios, Lucide React
-- **Server:** Node.js, Express, Mongoose
-- **Authentication:** JWT, bcrypt, Google OAuth 2.0
-- **AI provider:** Groq chat completions API
-- **Database:** MongoDB, with `mongodb-memory-server` as a local fallback
+### 1. Free-Form Text Input
+- Paste raw study notes, textbook excerpts, or enter any academic topic.
+- Preset topic selectors for quick one-click testing.
 
-## Project Structure
+### 2. Study Assistant Suite (Structured AI Output)
+- **Topic Overview & Takeaways**: Conceptual summary with interactive, checkable key takeaway items.
+- **Interactive 3D Flashcards**: 
+  - Smooth 3D card flip animation (click card or press `Spacebar`).
+  - **Audio Read-Aloud (Text-to-Speech)**: Built-in speaker button using browser-native Web Speech API to read questions, answers, and explanations aloud.
+  - **Download PDF**: One-click PDF export generator formatted cleanly as a printable study guide.
+  - **Mastery Tracking**: Mark cards as *Mastered* vs *Needs Review* with a live progress bar.
+  - **Spaced Repetition Filtering**: Toggle between *All Cards* and *Needs Review Only* to focus on un-mastered questions.
+  - **Keyboard Navigation**: `Left Arrow` / `Right Arrow` for card navigation, `Space` for flipping cards.
+- **Knowledge Assessment Quiz**:
+  - Question-by-question quiz with instant option feedback.
+  - Final score breakdown and performance metrics.
+  - **Re-Test Wrong Answers**: Dedicated feature that isolates missed questions for focused re-testing.
 
-```text
-client/                         React + Vite frontend
-  src/components/              UI and study assistant components
-  src/context/                  Authentication state
-  src/services/                 API client and result validation
-server/                         Express backend
-  controllers/                  AI, auth, and session logic
-  middleware/                   Authentication middleware
-  models/                       Mongoose models
-  routes/                       API route definitions
-  utils/                        Server-side validation helpers
+### 3. Authentication & Saved Workspaces
+- **Google OAuth 2.0**: Native Google sign-in using `@react-oauth/google` and server-side token verification (`google-auth-library`).
+- **JWT & Password Auth**: User registration and login backed by MongoDB and bcrypt password hashing.
+- **Saved Workspaces**: Automatic saving of study decks to MongoDB with a slide-out session drawer to reload or delete past study decks.
+
+---
+
+## 🛡️ Defensive AI Output Handling & Error Recovery
+
+A core requirement of this assignment is handling unpredictable AI output gracefully. Kognit AI implements a multi-layered defensive strategy:
+
+| Failure Mode | How It Is Detected | Visible UI Recovery State |
+| :--- | :--- | :--- |
+| **Malformed JSON** | `JSON.parse` try/catch block catches raw text or syntax errors. | Displays `MALFORMED_JSON` error panel, raw response inspector, and explicit **Retry Prompt** button. |
+| **Wrong Schema / Shape** | `schemaValidator.js` (backend) & `validateResult.js` (frontend) check for required arrays/fields. | Routes missing or corrupt fields to `INVALID_SCHEMA_SHAPE` error view without crashing the UI. |
+| **Empty Response** | Checks for null or blank content returned from model choices. | Catches `EMPTY_RESPONSE` error and prompts the user to retry with a more descriptive prompt. |
+| **Slow Response / Hang** | 30-second execution timeout guard via Axios/Fetch signal. | `LoadingState` shows live elapsed timer `({elapsed}s)` and a manual **Cancel Generation** button. |
+| **Failed Network Request** | Catches 5xx status codes or unreachable server exceptions. | Shows `NETWORK_ERROR` notification with a clear retry trigger. |
+| **Stale Responses** | Implements `AbortController` cancellation token on every new request. | Automatically aborts older in-flight requests when a newer request is started, preventing stale overwrites. |
+
+---
+
+## 🏗️ Technical Architecture & Key Protection
+
+- **Frontend**: React (hooks, functional components), Vite, Vanilla CSS with custom design system tokens (dark & light theme support), Lucide React SVG icons.
+- **Backend Proxy**: Node.js & Express API server.
+- **API Key Security**: The Groq API key is stored securely in the server environment (`server/.env`) and is **never shipped to the client browser**. Frontend calls `/api/ai/generate`.
+- **LLM Model**: Groq API using high-performance candidate models (`openai/gpt-oss-120b`, `openai/gpt-oss-20b`, `qwen/qwen3.8-27b`) with automatic candidate model fallbacks.
+- **Database**: MongoDB with Mongoose ORM (equipped with `mongodb-memory-server` for zero-config instant startup).
+
+```
+flam-frontend-assignment/
+├── client/                      # React (Vite) Frontend
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── StudyAssistant/  # Flashcards, Quiz, Summary components
+│   │   │   ├── ErrorState.jsx   # Shared error & retry UI
+│   │   │   ├── LoadingState.jsx # Animated loader with request cancellation
+│   │   │   ├── PromptInput.jsx  # Free-form input with sample presets
+│   │   │   ├── Navbar.jsx       # Header with theme toggle & auth modal trigger
+│   │   │   ├── SessionHistory.jsx # Saved Workspaces slide-out drawer
+│   │   │   └── AuthModal.jsx    # Google OAuth & email login modal
+│   │   ├── services/
+│   │   │   ├── api.js           # Backend API client with AbortController guard
+│   │   │   └── validateResult.js# Client-side defensive shape validator
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx  # Global auth state & JWT token manager
+│   │   ├── App.jsx              # Main workspace router & state
+│   │   └── index.css            # Custom CSS design system tokens
+│   └── package.json
+├── server/                      # Node.js Express Backend Proxy
+│   ├── controllers/
+│   │   ├── aiController.js      # Strict LLM prompt & defensive parsing logic
+│   │   └── authController.js    # JWT & Google OAuth verification controller
+│   ├── utils/
+│   │   └── schemaValidator.js   # Server-side structural schema validator
+│   ├── routes/                  # Express API routes (/api/ai, /api/auth, /api/sessions)
+│   ├── models/                  # Mongoose User & Session schemas
+│   ├── server.js                # Express app entry point
+│   └── package.json
+└── README.md
 ```
 
-## Requirements
+---
 
-- Node.js 18 or newer
-- npm 9 or newer
-- A Groq API key
-- MongoDB for persistent storage, or the local in-memory fallback
+## 🚀 Getting Started (Local Setup)
 
-## Local Setup
+### Prerequisites
+- **Node.js**: v18.0.0 or higher
+- **npm**: v9.0.0 or higher
 
-### 1. Install dependencies
+### 1. Install Dependencies
 
 ```bash
+# Install backend dependencies
 cd server
 npm install
 
+# Install frontend dependencies
 cd ../client
 npm install
 ```
 
-### 2. Configure environment variables
+### 2. Environment Configuration
 
-Create `server/.env`:
+The repository includes ready-to-run environment fallbacks. Optionally, configure your environment variables:
 
-```env
-PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/kognit_ai
-JWT_SECRET=replace_with_a_long_random_secret
-GROQ_API_KEY=gsk_your_groq_api_key
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-```
+- `server/.env`:
+  ```env
+  PORT=5000
+  JWT_SECRET=your_jwt_secret_key
+  GROQ_API_KEY=gsk_your_groq_api_key
+  GOOGLE_CLIENT_ID=your_google_client_id
+  GOOGLE_CLIENT_SECRET=your_google_client_secret
+  ```
 
-Create `client/.env`:
+- `client/.env`:
+  ```env
+  VITE_GOOGLE_CLIENT_ID=your_google_client_id
+  ```
 
-```env
-VITE_API_URL=http://localhost:5000
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
-```
-
-For local development, `VITE_API_URL` may be omitted because Vite proxies `/api` requests to `http://localhost:5000`. For a deployed frontend, set it to the public backend URL, for example `https://api.example.com`.
-
-### 3. Start the application
-
-Run the backend in one terminal:
+### 3. Run the Application
 
 ```bash
+# Terminal 1: Start Backend API Server (Port 5000)
 cd server
 npm start
-```
 
-Run the frontend in another terminal:
-
-```bash
+# Terminal 2: Start Frontend Development Server (Port 3000)
 cd client
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open **`http://localhost:3000`** in your browser to view the application.
 
-## Available Scripts
+---
 
-### Client
+## ⏳ Time Spent & Known Limitations
 
-```bash
-npm run dev       # Start the Vite development server
-npm run build     # Create a production build
-npm run preview   # Preview the production build locally
-```
+### Time Spent
+- **Estimated Development Time**: ~6.5 hours total (within the ~8-hour hard cap).
 
-### Server
-
-```bash
-npm start         # Start the Express API
-npm run dev       # Start the API with Node watch mode
-```
-
-## API Routes
-
-| Method | Route | Purpose | Auth |
-| --- | --- | --- | --- |
-| `POST` | `/api/auth/register` | Create an account | No |
-| `POST` | `/api/auth/login` | Sign in with email/password | No |
-| `POST` | `/api/auth/google` | Sign in with Google | No |
-| `GET` | `/api/auth/me` | Get the current user | Yes |
-| `POST` | `/api/ai/generate` | Generate and save study data | Optional |
-| `GET` | `/api/sessions` | List saved workspaces | Yes |
-| `GET` | `/api/sessions/:id` | Load a workspace | Yes |
-| `PUT` | `/api/sessions/:id/progress` | Update learning progress | Yes |
-| `DELETE` | `/api/sessions/:id` | Delete a workspace | Yes |
-| `GET` | `/api/health` | Check server availability | No |
-
-## Authentication and Saved Workspaces
-
-Generated content is saved only when the request includes a valid authenticated user. The client stores the JWT in `sessionStorage`, so each browser tab can use a different account. Closing a tab ends that tab's stored login; sign in again when opening a new tab.
-
-The Groq API key remains on the server and is never exposed to the browser. In production, configure `VITE_API_URL` on the frontend and allow the frontend origin through the backend CORS configuration.
-
-## Troubleshooting
-
-- **Saved workspaces are empty:** Confirm that you are signed in and that `VITE_API_URL` points to the running backend. Rebuild the client after changing Vite environment variables.
-- **AI generation fails:** Confirm `GROQ_API_KEY` is present and valid in `server/.env`.
-- **Authentication fails:** Confirm `JWT_SECRET` is configured consistently and that Google client IDs match between client and server.
-- **CORS or network errors:** Confirm the backend is reachable from the frontend and that the backend allows the deployed frontend origin.
+### Known Limitations
+- **API Rate Limits**: The Groq free-tier API has rate limits (RPM/TPM); if exceeded, the app will catch the error and present a friendly retry message.
+- **Context Length**: Text inputs exceeding ~4,000 words may reach token window constraints during structured JSON output generation.
