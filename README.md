@@ -3,7 +3,7 @@
 
 > **Live Demo:** https://ai-study-assistant-kognit-ai.vercel.app/
 
-Note: The backend is hosted on Render, so the first request may take a few seconds to load if the server is waking up. AI generation also depends on the availability and rate limits of the Groq API.
+
 
 Kognit AI turns notes or any study topic into a structured learning workspace. It uses the Groq API to generate summaries, flashcards, and quizzes, then presents them through an interactive React interface built for active recall.
 
@@ -165,3 +165,14 @@ The Groq API key remains on the server and is never exposed to the browser. Sess
 - **AI generation fails:** Confirm `GROQ_API_KEY` is present and valid in `server/.env`.
 - **Authentication fails:** Confirm `JWT_SECRET` is configured consistently and that Google client IDs match between client and server.
 - **CORS or network errors:** Confirm the backend is reachable from the frontend and that the backend allows the deployed frontend origin.
+
+```
+## Time Spent & Known Limitations
+
+### Time Spent
+- **Estimated Development Time**: ~6.5 hours total (within the ~8-hour hard cap).
+
+### Known Limitations
+- **API Rate Limits**: The Groq free-tier API has rate limits (RPM/TPM); if exceeded, the app will catch the error and present a friendly retry message.
+- **Context Length**: Text inputs exceeding ~4,000 words may reach token window constraints during structured JSON output generation.
+
