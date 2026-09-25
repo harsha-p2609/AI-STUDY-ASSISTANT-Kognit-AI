@@ -3,6 +3,8 @@
 
 > **Live Demo:** https://ai-study-assistant-kognit-ai.vercel.app/
 
+Note: The backend is hosted on Render, so the first request may take a few seconds to load if the server is waking up. AI generation also depends on the availability and rate limits of the Groq API.
+
 Kognit AI turns notes or any study topic into a structured learning workspace. It uses the Groq API to generate summaries, flashcards, and quizzes, then presents them through an interactive React interface built for active recall.
 
 > Learn actively. Review intentionally. Keep every workspace organized.
