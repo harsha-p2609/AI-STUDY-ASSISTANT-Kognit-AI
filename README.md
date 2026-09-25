@@ -166,6 +166,8 @@ The Groq API key remains on the server and is never exposed to the browser. Sess
 - **Authentication fails:** Confirm `JWT_SECRET` is configured consistently and that Google client IDs match between client and server.
 - **CORS or network errors:** Confirm the backend is reachable from the frontend and that the backend allows the deployed frontend origin.
 
+
+
 ```
 ## Time Spent & Known Limitations
 
