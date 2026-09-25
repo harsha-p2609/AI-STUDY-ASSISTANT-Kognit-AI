@@ -159,6 +159,21 @@ Generated content is saved only when the request includes a valid authenticated 
 
 The Groq API key remains on the server and is never exposed to the browser. Session data is scoped to the authenticated user, so users can only access their own saved workspaces.
 
+
+## Defensive AI Output Handling & Error Recovery
+
+A core requirement of this assignment is handling unpredictable AI output gracefully. Kognit AI implements a multi-layered defensive strategy:
+
+| Failure Mode | How It Is Detected | Visible UI Recovery State |
+| :--- | :--- | :--- |
+| **Malformed JSON** | `JSON.parse` try/catch block catches raw text or syntax errors. | Displays `MALFORMED_JSON` error panel, raw response inspector, and explicit **Retry Prompt** button. |
+| **Wrong Schema / Shape** | `schemaValidator.js` (backend) & `validateResult.js` (frontend) check for required arrays/fields. | Routes missing or corrupt fields to `INVALID_SCHEMA_SHAPE` error view without crashing the UI. |
+| **Empty Response** | Checks for null or blank content returned from model choices. | Catches `EMPTY_RESPONSE` error and prompts the user to retry with a more descriptive prompt. |
+| **Slow Response / Hang** | 30-second execution timeout guard via Axios/Fetch signal. | `LoadingState` shows live elapsed timer `({elapsed}s)` and a manual **Cancel Generation** button. |
+| **Failed Network Request** | Catches 5xx status codes or unreachable server exceptions. | Shows `NETWORK_ERROR` notification with a clear retry trigger. |
+| **Stale Responses** | Implements `AbortController` cancellation token on every new request. | Automatically aborts older in-flight requests when a newer request is started, preventing stale overwrites. |
+
+
 ## Troubleshooting
 
 - **Saved workspaces are empty:** Confirm that you are signed in and that `VITE_API_URL` points to the running backend. Rebuild the client after changing Vite environment variables.
@@ -167,8 +182,6 @@ The Groq API key remains on the server and is never exposed to the browser. Sess
 - **CORS or network errors:** Confirm the backend is reachable from the frontend and that the backend allows the deployed frontend origin.
 
 
-
-```
 ## Time Spent & Known Limitations
 
 ### Time Spent
