@@ -15,8 +15,8 @@ export async function callBackendProxy(prompt, token = '') {
   }
 
   try {
-    const response = await axios.post(
-      '/api/ai/generate',
+  const response = await axios.post(
+  `${import.meta.env.VITE_API_URL}/api/ai/generate`,
       { prompt },
       {
         headers,
