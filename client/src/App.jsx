@@ -25,6 +25,19 @@ function MainWorkspace() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
+  useEffect(() => {
+    if (!token) {
+      cancelActiveRequest();
+      setResultData(null);
+      setCurrentPrompt('');
+      setUserProgress({});
+      setErrorObj(null);
+      setIsLoading(false);
+      setShowHistory(false);
+      setShowAuthModal(false);
+    }
+  }, [token]);
+
   const toggleTheme = () => {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };

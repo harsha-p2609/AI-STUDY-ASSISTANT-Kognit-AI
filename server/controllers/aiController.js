@@ -155,6 +155,10 @@ exports.generateStructuredData = async (req, res) => {
           userProgress: {}
         });
       } catch (dbErr) {
+        return res.status(500).json({
+          error: 'SESSION_SAVE_ERROR',
+          message: 'Study data was generated but could not be saved to your workspace.'
+        });
       }
     }
 

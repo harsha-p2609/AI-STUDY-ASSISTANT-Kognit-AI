@@ -11,6 +11,8 @@ export default function SessionHistory({ isOpen, onClose, onLoadSession }) {
   useEffect(() => {
     if (isOpen && token) {
       fetchSessions();
+    } else if (!token) {
+      setSessions([]);
     }
   }, [isOpen, token]);
 
