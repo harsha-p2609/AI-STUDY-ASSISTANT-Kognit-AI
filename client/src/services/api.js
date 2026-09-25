@@ -1,5 +1,9 @@
 import axios from 'axios';
 
+const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
+export const apiUrl = (path) => `${API_URL}${path}`;
+
 let activeController = null;
 
 export async function callBackendProxy(prompt, token = '') {
@@ -16,7 +20,7 @@ export async function callBackendProxy(prompt, token = '') {
 
   try {
   const response = await axios.post(
-  `${import.meta.env.VITE_API_URL}/api/ai/generate`,
+  apiUrl('/api/ai/generate'),
       { prompt },
       {
         headers,

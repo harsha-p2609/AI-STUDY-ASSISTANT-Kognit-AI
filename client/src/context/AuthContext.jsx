@@ -1,15 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { apiUrl } from '../services/api';
 
 const AuthContext = createContext(null);
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(
-    localStorage.getItem('kognit_token') ||
-    localStorage.getItem('synthetix_token') ||
+    sessionStorage.getItem('kognit_token') ||
+    sessionStorage.getItem('synthetix_token') ||
     ''
   );
   const [loading, setLoading] = useState(true);
@@ -23,7 +22,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const res = await axios.get(`${API_URL}/api/auth/me`, {
+        const res = await axios.get(apiUrl('/api/auth/me'), {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -31,8 +30,8 @@ export const AuthProvider = ({ children }) => {
 
         setUser(res.data.user);
       } catch (err) {
-        localStorage.removeItem('kognit_token');
-        localStorage.removeItem('synthetix_token');
+        sessionStorage.removeItem('kognit_token');
+        sessionStorage.removeItem('synthetix_token');
         setToken('');
         setUser(null);
       } finally {
@@ -44,14 +43,11 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const login = async (email, password) => {
-    const res = await axios.post(
-      `${API_URL}/api/auth/login`,
-      { email, password }
-    );
+    const res = await axios.post(apiUrl('/api/auth/login'), { email, password });
 
     const newToken = res.data.token;
 
-    localStorage.setItem('kognit_token', newToken);
+    sessionStorage.setItem('kognit_token', newToken);
     setToken(newToken);
     setUser(res.data.user);
 
@@ -59,14 +55,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (name, email, password) => {
-    const res = await axios.post(
-      `${API_URL}/api/auth/register`,
-      { name, email, password }
-    );
+    const res = await axios.post(apiUrl('/api/auth/register'), { name, email, password });
 
     const newToken = res.data.token;
 
-    localStorage.setItem('kognit_token', newToken);
+    sessionStorage.setItem('kognit_token', newToken);
     setToken(newToken);
     setUser(res.data.user);
 
@@ -74,14 +67,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   const googleLogin = async (credential) => {
-    const res = await axios.post(
-      `${API_URL}/api/auth/google`,
-      { credential }
-    );
+    const res = await axios.post(apiUrl('/api/auth/google'), { credential });
 
     const newToken = res.data.token;
 
-    localStorage.setItem('kognit_token', newToken);
+    sessionStorage.setItem('kognit_token', newToken);
     setToken(newToken);
     setUser(res.data.user);
 
@@ -89,8 +79,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('kognit_token');
-    localStorage.removeItem('synthetix_token');
+    sessionStorage.removeItem('kognit_token');
+    sessionStorage.removeItem('synthetix_token');
     setToken('');
     setUser(null);
   };

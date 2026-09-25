@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { apiUrl } from '../services/api';
 import { X, Clock, Trash2, BookOpen, MapPin, Utensils, FolderOpen, ArrowRight } from 'lucide-react';
 
 export default function SessionHistory({ isOpen, onClose, onLoadSession }) {
@@ -19,7 +20,7 @@ export default function SessionHistory({ isOpen, onClose, onLoadSession }) {
   const fetchSessions = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('/api/sessions', {
+      const res = await axios.get(apiUrl('/api/sessions'), {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSessions(res.data.sessions || []);
@@ -31,7 +32,7 @@ export default function SessionHistory({ isOpen, onClose, onLoadSession }) {
 
   const handleSelectSession = async (sessionId) => {
     try {
-      const res = await axios.get(`/api/sessions/${sessionId}`, {
+      const res = await axios.get(apiUrl(`/api/sessions/${sessionId}`), {
         headers: { Authorization: `Bearer ${token}` }
       });
       onLoadSession(res.data.session);
@@ -43,7 +44,7 @@ export default function SessionHistory({ isOpen, onClose, onLoadSession }) {
   const handleDeleteSession = async (e, sessionId) => {
     e.stopPropagation();
     try {
-      await axios.delete(`/api/sessions/${sessionId}`, {
+      await axios.delete(apiUrl(`/api/sessions/${sessionId}`), {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSessions(prev => prev.filter(s => s._id !== sessionId));
