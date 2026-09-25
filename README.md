@@ -167,3 +167,65 @@ React Interactive Components
         ├── Takeaways
         ├── Flashcards
         └── Quiz
+
+
+## 🚀 Getting Started (Local Setup)
+
+### Prerequisites
+- **Node.js**: v18.0.0 or higher
+- **npm**: v9.0.0 or higher
+
+### 1. Install Dependencies
+
+```bash
+# Install backend dependencies
+cd server
+npm install
+
+# Install frontend dependencies
+cd ../client
+npm install
+```
+
+### 2. Environment Configuration
+
+The repository includes ready-to-run environment fallbacks. Optionally, configure your environment variables:
+
+- `server/.env`:
+  ```env
+  PORT=5000
+  JWT_SECRET=your_jwt_secret_key
+  GROQ_API_KEY=gsk_your_groq_api_key
+  GOOGLE_CLIENT_ID=your_google_client_id
+  GOOGLE_CLIENT_SECRET=your_google_client_secret
+  ```
+
+- `client/.env`:
+  ```env
+  VITE_GOOGLE_CLIENT_ID=your_google_client_id
+  ```
+
+### 3. Run the Application
+
+```bash
+# Terminal 1: Start Backend API Server (Port 5000)
+cd server
+npm start
+
+# Terminal 2: Start Frontend Development Server (Port 3000)
+cd client
+npm run dev
+```
+
+Open **`http://localhost:3000`** in your browser to view the application.
+
+---
+
+## ⏳ Time Spent & Known Limitations
+
+### Time Spent
+- **Estimated Development Time**: ~6.5 hours total (within the ~8-hour hard cap).
+
+### Known Limitations
+- **API Rate Limits**: The Groq free-tier API has rate limits (RPM/TPM); if exceeded, the app will catch the error and present a friendly retry message.
+- **Context Length**: Text inputs exceeding ~4,000 words may reach token window constraints during structured JSON output generation.
