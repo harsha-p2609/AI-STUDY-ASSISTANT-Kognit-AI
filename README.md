@@ -1,231 +1,162 @@
-# Kognit AI — Interactive Study Assistant
+# Kognit AI | Interactive Study Assistant
 
-> **Flam Frontend Internship Assignment** | AI-Powered Interactive Tool (Not a Chatbot)
+Kognit AI turns notes or any study topic into a structured learning workspace. It uses the Groq API to generate summaries, flashcards, and quizzes, then presents them through an interactive React interface built for active recall.
 
-Kognit AI is a full-stack AI-powered study assistant that transforms free-form study notes or academic topics into structured, interactive learning experiences.
+> Learn actively. Review intentionally. Keep every workspace organized.
 
-Instead of presenting AI output as a traditional chatbot conversation, Kognit AI converts model responses into structured learning components such as interactive flashcards, quizzes, summaries, takeaways, progress tracking, and saved study workspaces.
+## How It Works
 
-The application uses defensive AI-output validation to ensure malformed or unexpected model responses are handled gracefully before reaching the React UI.
+1. Enter notes, a textbook excerpt, or a topic.
+2. Kognit AI validates the generated structured response.
+3. Review the summary, flashcards, and quiz in one workspace.
+4. Track progress and return to saved workspaces whenever you need them.
 
----
+## Features
 
-##  Core Features
+- Generate structured study material from notes or a topic.
+- Review interactive flashcards with flip, mastery, filtering, keyboard navigation, and text-to-speech support.
+- Check key takeaways and retest missed quiz questions.
+- Export flashcards as a PDF study guide.
+- Register or sign in with email/password or Google OAuth.
+- Automatically save generated workspaces to MongoDB for authenticated users.
+- Browse, reload, and delete saved workspaces.
+- Keep separate accounts signed in independently in separate browser tabs.
+- Handle malformed AI output, invalid schemas, timeouts, cancellations, and network failures with recovery states.
 
-### 1. Free-Form Study Input
+## Stack
 
-Users can provide:
+- **Client:** React 18, Vite, Axios, Lucide React
+- **Server:** Node.js, Express, Mongoose
+- **Authentication:** JWT, bcrypt, Google OAuth 2.0
+- **AI provider:** Groq chat completions API
+- **Database:** MongoDB, with `mongodb-memory-server` as a local fallback
 
-- Raw study notes
-- Textbook excerpts
-- Academic concepts
-- Technical topics
-- Any free-form learning material
-
-Preset topics are also available for quick testing.
-
----
-
-### 2. AI Study Assistant
-
-Kognit AI transforms the provided content into structured learning material.
-
-#### Topic Overview & Takeaways
-
-- Generates a concise topic overview.
-- Extracts important concepts and key takeaways.
-- Takeaways can be interactively checked off.
-- Helps users track the concepts they have reviewed.
-
-#### Interactive 3D Flashcards
-
-- Interactive 3D flip-card animation.
-- Click a card to flip between question and answer.
-- Press `Spacebar` to flip cards.
-- `Left Arrow` and `Right Arrow` navigate between cards.
-- Browser-native Text-to-Speech for questions, answers, and explanations.
-- Mark cards as **Mastered** or **Needs Review**.
-- Live mastery progress tracking.
-- Filter cards using:
-  - All Cards
-  - Needs Review Only
-- Export flashcards as a formatted PDF study guide.
-
-#### Knowledge Assessment Quiz
-
-- Question-by-question quiz experience.
-- Multiple-choice questions.
-- Instant answer feedback.
-- Final score and performance breakdown.
-- Automatically identifies incorrect answers.
-- **Re-Test Wrong Answers** feature for focused revision.
-
----
-
-##  Authentication & User Accounts
-
-Kognit AI provides multiple authentication methods.
-
-### Google OAuth 2.0
-
-- Google Sign-In using `@react-oauth/google`.
-- Google ID tokens are verified on the backend using `google-auth-library`.
-- Google authentication is connected to the application's MongoDB user system.
-
-### Email & Password Authentication
-
-- User registration.
-- User login.
-- Password hashing using bcrypt.
-- JWT-based authentication.
-- Seven-day authentication tokens.
-
-### Multi-Tab Account Support
-
-Kognit AI supports independent authentication sessions across browser tabs.
-
-Users can:
-
-- Sign in with one account in one browser tab.
-- Sign in with a different account in another browser tab.
-- Keep both accounts active simultaneously.
-- Maintain separate authenticated sessions.
-- Access each account's own saved study workspaces.
-
-This is useful for testing multiple accounts, development, QA, and demonstrating user-specific workspaces.
-
----
-
-##  Saved Study Workspaces
-
-Authenticated users can save and manage their generated study sessions.
-
-Features include:
-
-- Automatic session saving.
-- MongoDB-backed persistence.
-- Session history drawer.
-- Reload previously generated study material.
-- Delete saved sessions.
-- User-specific session ownership.
-
-Each user's saved workspaces are associated with their authenticated account.
-
----
-
-#  Defensive AI Output Handling
-
-A major focus of Kognit AI is safely handling unpredictable LLM responses.
-
-The application does not assume that every model response will be valid JSON or follow the expected structure.
-
-AI responses pass through multiple validation and recovery layers.
-
-| Failure Mode | Detection | UI Recovery |
-|---|---|---|
-| Malformed JSON | `JSON.parse` try/catch | `MALFORMED_JSON` error state with retry |
-| Invalid schema | Backend and frontend schema validation | `INVALID_SCHEMA_SHAPE` error state |
-| Empty response | Response/content validation | `EMPTY_RESPONSE` error state |
-| Slow response | 30-second request timeout | Loading state with elapsed timer and cancel button |
-| Network failure | Axios error handling | `NETWORK_ERROR` state with retry |
-| Stale request | `AbortController` | Older request automatically cancelled |
-| Invalid flashcards | Frontend structure validation | Invalid result rejected before rendering |
-| Invalid quiz | Question/options/correct-answer validation | Invalid result rejected before rendering |
-
----
-
-##  Structured AI Pipeline
+## Project Structure
 
 ```text
-User Study Material
-        │
-        ▼
-React Frontend
-        │
-        ▼
-Express Backend
-        │
-        ▼
-Groq API
-        │
-        ▼
-LLM Structured Response
-        │
-        ▼
-JSON Parsing
-        │
-        ▼
-Schema Validation
-        │
-        ▼
-Frontend Validation
-        │
-        ▼
-React Interactive Components
-        │
-        ├── Summary
-        ├── Takeaways
-        ├── Flashcards
-        └── Quiz
+client/                         React + Vite frontend
+  src/components/              UI and study assistant components
+  src/context/                  Authentication state
+  src/services/                 API client and result validation
+server/                         Express backend
+  controllers/                  AI, auth, and session logic
+  middleware/                   Authentication middleware
+  models/                       Mongoose models
+  routes/                       API route definitions
+  utils/                        Server-side validation helpers
+```
 
+## Requirements
 
-## 🚀 Getting Started (Local Setup)
+- Node.js 18 or newer
+- npm 9 or newer
+- A Groq API key
+- MongoDB for persistent storage, or the local in-memory fallback
 
-### Prerequisites
-- **Node.js**: v18.0.0 or higher
-- **npm**: v9.0.0 or higher
+## Local Setup
 
-### 1. Install Dependencies
+### 1. Install dependencies
 
 ```bash
-# Install backend dependencies
 cd server
 npm install
 
-# Install frontend dependencies
 cd ../client
 npm install
 ```
 
-### 2. Environment Configuration
+### 2. Configure environment variables
 
-The repository includes ready-to-run environment fallbacks. Optionally, configure your environment variables:
+Create `server/.env`:
 
-- `server/.env`:
-  ```env
-  PORT=5000
-  JWT_SECRET=your_jwt_secret_key
-  GROQ_API_KEY=gsk_your_groq_api_key
-  GOOGLE_CLIENT_ID=your_google_client_id
-  GOOGLE_CLIENT_SECRET=your_google_client_secret
-  ```
+```env
+PORT=5000
+MONGODB_URI=mongodb://127.0.0.1:27017/kognit_ai
+JWT_SECRET=replace_with_a_long_random_secret
+GROQ_API_KEY=gsk_your_groq_api_key
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+```
 
-- `client/.env`:
-  ```env
-  VITE_GOOGLE_CLIENT_ID=your_google_client_id
-  ```
+Create `client/.env`:
 
-### 3. Run the Application
+```env
+VITE_API_URL=http://localhost:5000
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+```
+
+For local development, `VITE_API_URL` may be omitted because Vite proxies `/api` requests to `http://localhost:5000`. For a deployed frontend, set it to the public backend URL, such as `https://api.example.com`.
+
+### 3. Start the application
+
+Run the backend in one terminal:
 
 ```bash
-# Terminal 1: Start Backend API Server (Port 5000)
 cd server
 npm start
+```
 
-# Terminal 2: Start Frontend Development Server (Port 3000)
+Run the frontend in another terminal:
+
+```bash
 cd client
 npm run dev
 ```
 
-Open **`http://localhost:3000`** in your browser to view the application.
+Open [http://localhost:3000](http://localhost:3000).
 
----
+## Production Deployment
 
-## ⏳ Time Spent & Known Limitations
+1. Deploy the `server` directory to a Node.js host.
+2. Configure the server environment variables, including `GROQ_API_KEY`, `JWT_SECRET`, and `MONGODB_URI`.
+3. Set the frontend `VITE_API_URL` to the deployed backend URL.
+4. Set `VITE_GOOGLE_CLIENT_ID` to the Google OAuth client used by the backend.
+5. Run `npm run build` in `client` and deploy the generated `client/dist` directory.
+6. Configure the backend CORS policy to allow the deployed frontend origin.
 
-### Time Spent
-- **Estimated Development Time**: ~6.5 hours total (within the ~8-hour hard cap).
+Vite environment variables are embedded at build time. Rebuild the client after changing them.
 
-### Known Limitations
-- **API Rate Limits**: The Groq free-tier API has rate limits (RPM/TPM); if exceeded, the app will catch the error and present a friendly retry message.
-- **Context Length**: Text inputs exceeding ~4,000 words may reach token window constraints during structured JSON output generation.
+## Available Scripts
+
+### Client
+
+```bash
+npm run dev       # Start the Vite development server
+npm run build     # Create a production build
+npm run preview   # Preview the production build locally
+```
+
+### Server
+
+```bash
+npm start         # Start the Express API
+npm run dev       # Start the API with Node watch mode
+```
+
+## API Routes
+
+| Method | Route | Purpose | Auth |
+| --- | --- | --- | --- |
+| `POST` | `/api/auth/register` | Create an account | No |
+| `POST` | `/api/auth/login` | Sign in with email/password | No |
+| `POST` | `/api/auth/google` | Sign in with Google | No |
+| `GET` | `/api/auth/me` | Get the current user | Yes |
+| `POST` | `/api/ai/generate` | Generate and save study data | Optional |
+| `GET` | `/api/sessions` | List saved workspaces | Yes |
+| `GET` | `/api/sessions/:id` | Load a workspace | Yes |
+| `PUT` | `/api/sessions/:id/progress` | Update learning progress | Yes |
+| `DELETE` | `/api/sessions/:id` | Delete a workspace | Yes |
+| `GET` | `/api/health` | Check server availability | No |
+
+## Authentication and Saved Workspaces
+
+Generated content is saved only when the request includes a valid authenticated user. The client stores the JWT in `sessionStorage`, so each browser tab can use a different account. Closing a tab ends that tab's stored login; sign in again when opening a new tab.
+
+The Groq API key remains on the server and is never exposed to the browser. Session data is scoped to the authenticated user, so users can only access their own saved workspaces.
+
+## Troubleshooting
+
+- **Saved workspaces are empty:** Confirm that you are signed in and that `VITE_API_URL` points to the running backend. Rebuild the client after changing Vite environment variables.
+- **AI generation fails:** Confirm `GROQ_API_KEY` is present and valid in `server/.env`.
+- **Authentication fails:** Confirm `JWT_SECRET` is configured consistently and that Google client IDs match between client and server.
+- **CORS or network errors:** Confirm the backend is reachable from the frontend and that the backend allows the deployed frontend origin.
